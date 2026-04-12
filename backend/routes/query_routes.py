@@ -25,7 +25,7 @@ def handle_query(request: QueryRequest, db: Session = Depends(get_db_session)):
     4. Result Explanation (LLM)
     """
     query = request.query
-    print("Incoming query:", query)
+    # print("Incoming query:", query)
 
     # 🧠 Step 1: Classify the query intent (Comparison, Breakdown, etc.)
     # This helps guide the SQL generator and the final explainer.
