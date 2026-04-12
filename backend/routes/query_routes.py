@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from models.request_models import QueryRequest
 from core.get_sql_from_llm import SQLGenerator, validate_sql
+from core.explainer_data import ExplanationGenerator
 
 # TEMP: no real imports yet
 # from core.planner import QueryPlanner
@@ -35,12 +36,12 @@ def handle_query(request: QueryRequest):
     # data = fake_executor(sql)
 
     # 🧠 Step 4: explanation (placeholder)
-    # explanation = fake_explainer(query, data)
+    explanation = ExplanationGenerator().generate(query, data, parsed_json["category"])
 
     return {
         "query": query,
         "plan": parsed_json,
         "sql": sql,
         "data": "data",
-        "explanation": "explanation"
+        "explanation": explanation
     }
