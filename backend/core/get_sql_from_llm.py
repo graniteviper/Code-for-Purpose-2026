@@ -10,8 +10,9 @@ class SQLGenerator:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel("gemini-2.5-flash")
 
-    def generate_sql(self, user_query, parsed_json, db_schema, db):
-        sample_rows = get_sample_data(db)
+    def generate_sql(self, user_query, parsed_json, db_schema):
+        sample_rows = get_sample_data()
+        # print(sample_rows)
         prompt = build_sql_prompt(user_query, parsed_json, db_schema, sample_rows)
 
         response = self.model.generate_content(prompt)

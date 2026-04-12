@@ -28,7 +28,7 @@ def handle_query(request: QueryRequest, db: Session = Depends(get_db_session)):
 
     # Get dynamic DB schema
     db_schema_json = get_database_schema()
-    print(db_schema_json)
+    # print(db_schema_json)
     # ⚙️ Step 2: SQL generator
     sql_gen = SQLGenerator()
 

@@ -35,14 +35,14 @@ def test():
     parsed_json = {
         "category": "comparison"
     }
-    sample_data = get_sample_data(session)
+    sample_data = get_sample_data()
     db_schema_json = get_database_schema()
-    print(db_schema_json)
+    # print(db_schema_json)
     # 🔹 generate SQL
     sql_gen = SQLGenerator()
     sql = sql_gen.generate_sql(user_query, parsed_json, db_schema_json, session)
 
-    print("\nGenerated SQL:\n", sql)
+    # print("\nGenerated SQL:\n", sql)
 
     # 🔐 validate
     if not validate_sql(sql):
