@@ -1,3 +1,7 @@
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
 def build_change_explainer(query, data):
     return f"""
 You are a business data analyst.
@@ -124,10 +128,6 @@ def get_explainer_prompt(category, query, data):
 
 class ExplanationGenerator:
     def __init__(self):
-        import os
-        import google.generativeai as genai
-        from dotenv import load_dotenv
-
         load_dotenv()
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel("gemini-2.5-flash")
