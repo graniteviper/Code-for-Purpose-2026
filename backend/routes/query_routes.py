@@ -4,8 +4,14 @@ from core.get_sql_from_llm import SQLGenerator, validate_sql
 
 # TEMP: no real imports yet
 # from core.planner import QueryPlanner
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from core.database import get_db_session
 
 router = APIRouter()
+
+from core.planner import plan_query
 
 @router.post("/query")
 def handle_query(request: QueryRequest):
@@ -14,14 +20,7 @@ def handle_query(request: QueryRequest):
     print("Incoming query:", query)
 
     # 🧠 Step 1: planner (placeholder)
-    # parsed_json = fake_planner(query)
-    parsed_json = {
-  "category": "breakdown",
-  "metric": "revenue",
-  "time_range": "last month",
-  "filters": {"category": "grocery"},
-  "group_by": "product_name"
-}
+    parsed_json = plan_query(query)
 
     # ⚙️ Step 2: SQL generator (placeholder)
     sql_gen = SQLGenerator()
@@ -45,24 +44,3 @@ def handle_query(request: QueryRequest):
         "data": "data",
         "explanation": "explanation"
     }
-
-
-
-
-def fake_planner(query):
-    return {
-        "category": "breakdown",
-        "note": "planner not implemented yet"
-    }
-
-def fake_sql_generator(plan):
-    return "SELECT * FROM inventory LIMIT 5;"
-
-def fake_executor(sql):
-    return [
-        {"product": "Apple", "revenue": 100},
-        {"product": "Milk", "revenue": 200}
-    ]
-
-def fake_explainer(query, data):
-    return "This is a placeholder explanation."
