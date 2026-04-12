@@ -9,7 +9,17 @@ from core.explainer_data import (
     ExplanationGenerator
 )
 
+"""
+Unit tests for the business logic explainer module.
+Verifies that prompts are correctly constructed for different categories
+and that the ExplanationGenerator correctly interacts with the LLM API.
+"""
+
 def test_build_explainer_prompts():
+    """
+    Ensures that each specific explainer builder (change, comparison, breakdown, summary)
+    includes the expected category headers in the generated prompt.
+    """
     query = "test query"
     data = [{"id": 1}]
     
@@ -19,6 +29,10 @@ def test_build_explainer_prompts():
     assert "Category: Summarize" in build_summary_explainer(query, data)
 
 def test_get_explainer_prompt():
+    """
+    Validates the routing logic that chooses the correct prompt builder 
+    based on the classification category.
+    """
     query = "test"
     data = []
     
@@ -26,10 +40,15 @@ def test_get_explainer_prompt():
     assert "Category: Compare" in get_explainer_prompt("comparison", query, data)
     assert "Category: Breakdown" in get_explainer_prompt("breakdown", query, data)
     assert "Category: Summarize" in get_explainer_prompt("summary", query, data)
+    # Default case for unknown categories
     assert "Category: Summarize" in get_explainer_prompt("unknown", query, data)
 
 @patch("core.explainer_data.genai.GenerativeModel")
 def test_explanation_generator_generate(mock_model_class):
+    """
+    Tests the main generate function of the ExplanationGenerator by mocking 
+    the Google Gemini API response.
+    """
     mock_model = MagicMock()
     mock_response = MagicMock()
     mock_response.text = '{"summary": "test"}'
@@ -39,5 +58,6 @@ def test_explanation_generator_generate(mock_model_class):
     generator = ExplanationGenerator()
     result = generator.generate("query", [], "summary")
     
+    # Assert that the cleaned-up output matches the mock response
     assert result == '{"summary": "test"}'
     mock_model.generate_content.assert_called_once()

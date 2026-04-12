@@ -4,6 +4,11 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Button Variants
+ * Defines the style variations (colors, sizes) for the Button component using 'class-variance-authority'.
+ * This approach allows for type-safe style props and easy maintenance of reusable button styles.
+ */
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
@@ -39,6 +44,11 @@ export interface ButtonProps
   asChild?: boolean
 }
 
+/**
+ * Button Component
+ * A highly customizable button that supports multiple variants and sizes.
+ * 'asChild' prop allows it to be used as a wrapper for other elements (e.g., links).
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"

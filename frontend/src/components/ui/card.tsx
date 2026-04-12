@@ -2,6 +2,11 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Card Component
+ * A flexible container for grouping related content.
+ * Includes sub-components for consistent layout (Header, Title, Description, Content, Footer).
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +22,10 @@ const Card = React.forwardRef<
 ))
 Card.displayName = "Card"
 
+/**
+ * CardHeader Component
+ * Container for the top section of the card, typically containing Title and Description.
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -29,6 +38,10 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = "CardHeader"
 
+/**
+ * CardTitle Component
+ * The main heading of the card.
+ */
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
@@ -41,6 +54,10 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = "CardTitle"
 
+/**
+ * CardDescription Component
+ * Supporting text that provides more context about the card's content.
+ */
 const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -53,6 +70,10 @@ const CardDescription = React.forwardRef<
 ))
 CardDescription.displayName = "CardDescription"
 
+/**
+ * CardContent Component
+ * The main body of the card where the primary content resides.
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -61,6 +82,10 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = "CardContent"
 
+/**
+ * CardFooter Component
+ * The bottom section of the card, often used for actions or metadata.
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

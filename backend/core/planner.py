@@ -1,5 +1,8 @@
 import re
 
+# CATEGORY_PATTERNS: A dictionary of regular expressions used to classify user queries.
+# Each key represents a business logic category, and the list of patterns identifies
+# keywords or phrases associated with that category.
 CATEGORY_PATTERNS = {
     "change_analysis": [
         r"why.*(drop|increase|decrease|change|rise|fall|growth|decline)",
@@ -46,20 +49,35 @@ CATEGORY_PATTERNS = {
     ]
 }
 
+# PRIORITY: Defines the order in which patterns are checked.
+# Since a query might match multiple categories, the order of classification matters.
 PRIORITY = ["change_analysis", "comparison", "breakdown", "summary"]
 
 def plan_query(query: str) -> dict:
+    """
+    Classifies the user query into one of the predefined analysis categories.
+    This classification helps guide both SQL generation and the final insight explanation.
+    
+    Args:
+        query: The raw string of the user's natural language question.
+        
+    Returns:
+        dict: A dictionary containing the 'category' and a 'note' about why it was chosen.
+    """
+    # Normalize the query for case-insensitive matching
     query_clean = query.strip().lower()
 
+    # Iterate through each category in order of priority
     for category in PRIORITY:
         for pattern in CATEGORY_PATTERNS[category]:
+            # Use regex to find a match in the cleaned query
             if re.search(pattern, query_clean, re.IGNORECASE):
                 return {
                     "category": category,
                     "note": f"Matched pattern for {category}"
                 }
 
-    # Always keep a fallback
+    # If no specific patterns match, default to a general 'summary' category
     return {
         "category": "summary",
         "note": "Fallback category triggered"
