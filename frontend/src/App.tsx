@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Send, Terminal, Loader2, Database } from 'lucide-react'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 function App() {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -22,7 +24,7 @@ function App() {
     setResponse(null)
 
     try {
-      const res = await fetch('/query', {
+      const res = await fetch(`${API_BASE_URL}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
