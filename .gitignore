@@ -1,0 +1,9 @@
+backend/.env
+frontend/.env
+.venv
+.env
+backend/__pycache__
+backend/routes/__pycache__
+backend/core/__pycache__
+backend/models/__pycache__
+*.pyc
