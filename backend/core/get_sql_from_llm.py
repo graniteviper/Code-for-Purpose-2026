@@ -1,3 +1,4 @@
+from core.executor import get_sample_data
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -9,8 +10,9 @@ class SQLGenerator:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel("gemini-2.5-flash")
 
-    def generate_sql(self, user_query, parsed_json):
-        prompt = build_sql_prompt(user_query, parsed_json)
+    def generate_sql(self, user_query, parsed_json, db_schema, db):
+        sample_rows = get_sample_data(db)
+        prompt = build_sql_prompt(user_query, parsed_json, db_schema, sample_rows)
 
         response = self.model.generate_content(prompt)
 
@@ -34,7 +36,7 @@ def validate_sql(sql):
 
     return True
 
-def build_sql_prompt(user_query, parsed_json):
+def build_sql_prompt(user_query, parsed_json, db_schema, sample_rows):
     return f"""
 You are an expert PostgreSQL data analyst.
 
@@ -49,47 +51,59 @@ PARSED INTENT:
 
 ----------------------------------------
 DATABASE SCHEMA:
+{db_schema}
 
-Table: inventory
-Columns:
-- date (DATE)
-- product_name (TEXT)
-- category (TEXT)
-- quantity_sold (INT)
-- revenue (NUMERIC)
+----------------------------------------
+SAMPLE DATA (IMPORTANT - USE THIS TO UNDERSTAND VALUES):
+{sample_rows}
+
+----------------------------------------
+INSTRUCTIONS:
+
+- Use SAMPLE DATA to understand:
+  • valid product_name values (e.g., Laptop, Monitor)
+  • valid product_category values (e.g., Electronics, Clothing)
+  • realistic filters (e.g., product_name = 'Laptop')
+
+- If user mentions:
+  • product → use product_name
+  • category → use product_category
+  • id → use product_id
+
+- Prefer filtering using exact values seen in SAMPLE DATA
 
 ----------------------------------------
 CATEGORY DEFINITIONS:
 
 1. change_analysis:
-- Compare two time periods
+- Compare across time (manufacture_date if needed)
 - Identify increase/decrease
-- Group by category or product
-- Focus on drivers of change
+- Group by product or category
 
 2. breakdown:
-- Group data by category/product
-- Show contribution using SUM(metric)
+- GROUP BY product_name or product_category
+- Use SUM() for aggregation
 
 3. comparison:
-- Compare entities (products/categories)
-- Filter specific values if provided
-- Use aggregation and sorting
+- Compare entities (Laptop vs Monitor, etc.)
+- Use WHERE with IN (...)
+- Use aggregation if needed
 
 4. summary:
-- Provide total or average
-- Optionally group by time (daily/weekly)
+- Use SUM / AVG
+- No unnecessary grouping
 
 ----------------------------------------
-RULES:
+STRICT RULES:
 
 - ONLY generate SQL (no explanation)
-- ONLY use SELECT queries
+- ONLY SELECT queries
 - NEVER use DELETE, UPDATE, INSERT, DROP
 - Use correct GROUP BY when aggregating
-- Use WHERE for filters (category, product, time)
+- Use WHERE for filtering
 - Use ORDER BY for ranking
-- Use LIMIT when appropriate (e.g., top results)
+- Use LIMIT when useful
+- Prefer explicit column names (NO SELECT *)
 
 ----------------------------------------
 OUTPUT:
