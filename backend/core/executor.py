@@ -25,29 +25,34 @@ def serialize_value(value):
 def serialize_row(row):
     return {key: serialize_value(value) for key, value in row.items()}
 
+def get_all_tables(conn):
+    result = conn.execute(
+        text("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
+    )
+    return [row[0] for row in result.fetchall()]
 
 def get_sample_data():
-    # 1. Try file
-    if os.path.exists(FILE_PATH):
-        with open(FILE_PATH, "r") as f:
-            content = f.read().strip()
-            if content:
-                try:
-                    return json.loads(content)
-                except:
-                    pass
+    data = {}
 
-    # 2. Fetch from DB
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT * FROM kaggle_products LIMIT 20"))
-        rows = [serialize_row(dict(row._mapping)) for row in result.fetchall()]
+        tables = get_all_tables(conn)
 
-    # 3. Save
-    os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
-    with open(FILE_PATH, "w") as f:
-        json.dump(rows, f)
+        for table in tables:
+            try:
+                result = conn.execute(
+                    text(f"SELECT * FROM {table} LIMIT 10")
+                )
+                rows = [
+                    serialize_row(dict(row._mapping))
+                    for row in result.fetchall()
+                ]
+                data[table] = rows
 
-    return rows
+            except Exception as e:
+                # Skip problematic tables
+                data[table] = f"Error: {str(e)}"
+
+    return data
 
 def execute_sql_query(session: Session, sql: str):
     """
