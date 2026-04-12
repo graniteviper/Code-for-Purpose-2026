@@ -3,13 +3,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file to access sensitive configurations
 load_dotenv()
 
+# Retrieve the database connection URL from the environment
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Set up the SQLAlchemy engine
+# Initialize the SQLAlchemy components
+# engine: The gateway to the database, handles connection pooling
+# SessionLocal: A factory for creating new database session objects
 if DATABASE_URL:
+    # pool_pre_ping=True helps handle stale connections by checking connectivity before use
     engine = create_engine(DATABASE_URL, pool_pre_ping=True)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 else:
@@ -17,7 +21,15 @@ else:
     SessionLocal = None
 
 def get_db_session():
-    """Returns a new database session if configured."""
+    """
+    Dependency generator for creating and closing database sessions.
+    
+    Yields:
+        session: An active SQLAlchemy Session object.
+        
+    Raises:
+        ValueError: If the database is not correctly configured.
+    """
     if not SessionLocal:
         raise ValueError("DATABASE_URL is not set or invalid.")
     
@@ -25,4 +37,5 @@ def get_db_session():
     try:
         yield session
     finally:
+        # Ensure the session is closed even if an exception occurs during request processing
         session.close()

@@ -7,14 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Send, Terminal, Loader2, Database } from 'lucide-react'
 
+// Backend API URL configuration with fallback for local development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 function App() {
-  const [query, setQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [response, setResponse] = useState<any>(null)
-  const [error, setError] = useState('')
+  // --- State Management ---
+  const [query, setQuery] = useState('')           // Stores the current user input
+  const [isLoading, setIsLoading] = useState(false) // Tracks if an API request is in progress
+  const [response, setResponse] = useState<any>(null)// Stores the successful API result
+  const [error, setError] = useState('')           // Stores any error messages from the backend
 
+  /**
+   * Handles the submission of the natural language query.
+   * Sends a POST request to the backend and handles JSON parsing and error cases.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
@@ -24,7 +30,8 @@ function App() {
     setResponse(null)
 
     try {
-      const res = await fetch(`${API_BASE_URL}query`, {
+      // POST request to the /query endpoint with the user's natural language string
+      const res = await fetch(`${API_BASE_URL}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -33,12 +40,15 @@ function App() {
       let data;
       const text = await res.text();
       
+      // Attempt to parse the response as JSON
       try {
         data = JSON.parse(text);
       } catch (parseErr) {
+        // Handle non-JSON responses (often indicative of a server crash or 404)
         throw new Error(!res.ok ? `Server Error (${res.status}): ${text}` : `Invalid JSON response: ${text}`);
       }
       
+      // Check for application-level errors returned in the JSON payload
       if (!res.ok || data.error) {
         throw new Error(data.error || `Failed to fetch query results (${res.status})`)
       }
@@ -51,12 +61,15 @@ function App() {
     }
   }
 
-  // Render dynamic data as a table if it's an array of objects
+  /**
+   * Dynamically renders the database results as a table.
+   * Handles arrays of objects (table view) and empty results.
+   */
   const renderData = (data: any) => {
     if (!data) return null;
     
     if (Array.isArray(data) && data.length > 0) {
-      const keys = Object.keys(data[0])
+      const keys = Object.keys(data[0]) // Extract column headers from the first record
       return (
         <div className="overflow-x-auto w-full border rounded-md mt-4">
           <table className="w-full text-sm text-left">
@@ -82,6 +95,7 @@ function App() {
     } else if (Array.isArray(data) && data.length === 0) {
       return <div className="p-4 text-center text-muted-foreground bg-muted/20 rounded-md mt-4">No results found</div>
     } else {
+      // Fallback for non-array results (e.g., single metrics or raw JSON)
       return (
         <div className="p-4 bg-muted/30 rounded-md mt-4">
           <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(data, null, 2)}</pre>
@@ -90,21 +104,25 @@ function App() {
     }
   }
 
+  /**
+   * Renders the LLM-generated business insight.
+   * Handles both plain strings and structured JSON outputs from the explainer.
+   */
   const renderExplanation = (exp: any) => {
     if (!exp) return null;
     let parsedExp = exp;
     
-    // Attempt to parse stringified JSON
+    // Attempt to parse stringified JSON if the backend returned it as a string
     if (typeof exp === 'string') {
       try {
         parsedExp = JSON.parse(exp);
       } catch (e) {
-        // Just a regular string
+        // If parsing fails, treat it as a regular string
         return <p className="text-base text-card-foreground mt-2 font-medium">{exp}</p>;
       }
     }
     
-    // Render the structured JSON output nicely
+    // Render the structured insight sections with custom styling
     if (typeof parsedExp === 'object' && parsedExp !== null) {
       return (
         <div className="flex flex-col gap-3 mt-4 text-sm w-full">
@@ -142,7 +160,7 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         
-        {/* Header */}
+        {/* Navigation Header */}
         <header className="border-b sticky top-0 bg-background/80 backdrop-blur z-10 w-full">
           <div className="container flex h-16 items-center justify-between mx-auto px-4">
             <div className="flex items-center gap-2">
@@ -153,9 +171,10 @@ function App() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Main Interface */}
         <main className="flex-1 container mx-auto px-4 py-8 mb-20 max-w-4xl flex flex-col items-center">
           
+          {/* Hero Section */}
           <div className="w-full text-center mb-10 space-y-4">
             <h2 className="text-3xl font-extrabold tracking-tight lg:text-5xl">
               Ask your Data Anything
@@ -165,7 +184,7 @@ function App() {
             </p>
           </div>
 
-          {/* Form */}
+          {/* Search/Query Form */}
           <form onSubmit={handleSubmit} className="w-full relative shadow-sm max-w-2xl flex gap-2">
             <Input 
               value={query}
@@ -183,7 +202,7 @@ function App() {
             </Button>
           </form>
 
-          {/* Error display */}
+          {/* Error display card */}
           {error && (
             <Card className="w-full mt-8 border-destructive/50 bg-destructive/10 text-destructive">
               <CardContent className="p-4">
@@ -192,21 +211,23 @@ function App() {
             </Card>
           )}
 
-          {/* Results Display */}
+          {/* Results Area: Displays once an API response is received */}
           {response && (
             <div className="w-full mt-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500 fade-in">
               
+              {/* Main Results Card: Data Table */}
               <Card className="overflow-hidden border-primary/20 shadow-md">
                 <CardContent className="pt-6 pb-2">
                   <div className="font-semibold text-lg border-b pb-2 mb-4">Results</div>
                   {renderData(response.data)}
                 </CardContent>
 
+                {/* Collapsible section for deep-dive details (SQL and Insights) */}
                 {(response.explanation || response.sql) && (
                   <div className="px-6 pb-6 space-y-4 mt-2">
                     <Accordion type="multiple" className="w-full space-y-2">
                       
-                      {/* Accordion for Insight */}
+                      {/* Accordion for Business Insight (Explanation) */}
                       {response.explanation && (
                         <AccordionItem value="insight" className="border rounded-md px-4 bg-primary/5">
                           <AccordionTrigger className="text-sm font-medium hover:no-underline">
@@ -221,7 +242,7 @@ function App() {
                         </AccordionItem>
                       )}
 
-                      {/* Accordion for SQL Query */}
+                      {/* Accordion for Generated SQL Query (for transparency) */}
                       {response.sql && (
                         <AccordionItem value="sql" className="border rounded-md px-4 bg-muted/10">
                           <AccordionTrigger className="text-sm font-medium hover:no-underline">
@@ -246,7 +267,7 @@ function App() {
           )}
         </main>
 
-        {/* Footer */}
+        {/* Branding Footer */}
         <footer className="border-t py-6 mt-auto">
           <div className="container mx-auto px-4 flex justify-between items-center text-sm text-muted-foreground">
             <p>Team Name - bottom3</p>

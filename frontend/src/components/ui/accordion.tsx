@@ -4,8 +4,17 @@ import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Accordion Component
+ * A set of vertically stacked content headings that each reveal a section of content.
+ * Built using Radix UI primitives for accessibility and Tailwind CSS for styling.
+ */
 const Accordion = AccordionPrimitive.Root
 
+/**
+ * AccordionItem Component
+ * Wraps an individual section of the accordion.
+ */
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
@@ -18,6 +27,10 @@ const AccordionItem = React.forwardRef<
 ))
 AccordionItem.displayName = "AccordionItem"
 
+/**
+ * AccordionTrigger Component
+ * The interactive header that toggles the visibility of the AccordionContent.
+ */
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
@@ -38,6 +51,10 @@ const AccordionTrigger = React.forwardRef<
 ))
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
+/**
+ * AccordionContent Component
+ * The collapsible area that reveals its children when the AccordionTrigger is activated.
+ */
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>

@@ -3,6 +3,16 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 def build_change_explainer(query, data):
+    """
+    Constructs a prompt for the LLM to analyze what changed in the data.
+    
+    Args:
+        query: The original user question.
+        data: The JSON result from the database execution.
+        
+    Returns:
+        A string containing the formatted prompt for the LLM.
+    """
     return f"""
 You are a business data analyst.
 
@@ -32,6 +42,16 @@ Output format (STRICT JSON):
 """
 
 def build_comparison_explainer(query, data):
+    """
+    Constructs a prompt for the LLM to compare multiple items in the data.
+    
+    Args:
+        query: The original user question.
+        data: The JSON result from the database execution.
+        
+    Returns:
+        A string containing the formatted prompt for the LLM.
+    """
     return f"""
 You are a business data analyst.
 
@@ -61,6 +81,16 @@ Output format (STRICT JSON):
 """
 
 def build_breakdown_explainer(query, data):
+    """
+    Constructs a prompt for the LLM to explain the composition of a metric.
+    
+    Args:
+        query: The original user question.
+        data: The JSON result from the database execution.
+        
+    Returns:
+        A string containing the formatted prompt for the LLM.
+    """
     return f"""
 You are a business data analyst.
 
@@ -89,6 +119,16 @@ Output format (STRICT JSON):
 """
 
 def build_summary_explainer(query, data):
+    """
+    Constructs a general-purpose summary prompt for the LLM.
+    
+    Args:
+        query: The original user question.
+        data: The JSON result from the database execution.
+        
+    Returns:
+        A string containing the formatted prompt for the LLM.
+    """
     return f"""
 You are a business data analyst.
 
@@ -117,6 +157,17 @@ Output format (STRICT JSON):
 """
 
 def get_explainer_prompt(category, query, data):
+    """
+    Routes to the appropriate prompt builder based on the query category.
+    
+    Args:
+        category: The classification from the planner (e.g., 'comparison').
+        query: The user question.
+        data: The query results.
+        
+    Returns:
+        A string prompt for the LLM.
+    """
     if category == "change_analysis":
         return build_change_explainer(query, data)
     elif category == "comparison":
@@ -127,17 +178,35 @@ def get_explainer_prompt(category, query, data):
         return build_summary_explainer(query, data)
 
 class ExplanationGenerator:
+    """
+    A service class to handle interaction with the Gemini API to generate human-readable insights.
+    """
     def __init__(self):
+        # Configure the Gemini model
         load_dotenv()
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        # Using the flash model for faster response times
         self.model = genai.GenerativeModel("gemini-2.5-flash")
 
     def generate(self, query, data, category):
+        """
+        Sends the data results and query to the LLM to get a structured explanation.
+        
+        Args:
+            query: The user question.
+            data: The raw data from the DB.
+            category: The query category.
+            
+        Returns:
+            A JSON-formatted string with the explanation.
+        """
         prompt = get_explainer_prompt(category, query, data)
 
+        # Generate the insightful summary
         response = self.model.generate_content(prompt)
 
+        # Basic cleanup: remove markdown formatting and whitespace
         text = response.text.strip()
         text = text.replace("```json", "").replace("```", "").strip()
 
-        return text
+        return text
