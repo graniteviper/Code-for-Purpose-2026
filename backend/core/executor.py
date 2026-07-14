@@ -10,7 +10,10 @@ from datetime import date, datetime
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_engine(DATABASE_URL)
+if DATABASE_URL:
+    engine = create_engine(DATABASE_URL)
+else:
+    engine = None
 
 # Path to cache or read sample data from
 FILE_PATH = "backend/data/sample_data.txt"
@@ -67,6 +70,9 @@ def get_sample_data():
     Returns:
         A dictionary where keys are table names and values are lists of sampled rows.
     """
+    if not engine:
+        return {}
+        
     data = {}
 
     with engine.connect() as conn:
