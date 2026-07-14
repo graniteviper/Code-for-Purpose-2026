@@ -35,8 +35,9 @@ def test_build_sql_prompt():
     parsed_json = {"category": "summary"}
     db_schema = "table inventory(product_name, revenue)"
     sample_rows = [{"product_name": "Laptop", "revenue": 100}]
+    table_required = ["inventory"]
     
-    prompt = build_sql_prompt(user_query, parsed_json, db_schema, sample_rows)
+    prompt = build_sql_prompt(user_query, parsed_json, db_schema, table_required, sample_rows)
     
     assert "What are the laptop sales?" in prompt
     assert "inventory" in prompt
@@ -57,7 +58,7 @@ def test_sql_generator_generate(mock_get_sample, mock_model_class):
     mock_model_class.return_value = mock_model
     
     generator = SQLGenerator()
-    sql = generator.generate_sql("query", {}, "schema")
+    sql = generator.generate_sql("query", {}, "schema", ["inventory"])
     
     # Verify the SQL is correctly extracted and stripped
     assert sql == "SELECT * FROM inventory"
